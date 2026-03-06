@@ -11,6 +11,11 @@ export const GuestsPage: React.FC = () => {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [guests, setGuests] = useState<Guest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // search/filter state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [rsvpFilter, setRsvpFilter] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const { addToast } = useToast();
@@ -24,6 +29,12 @@ export const GuestsPage: React.FC = () => {
       loadGuests();
     }
   }, [selectedEventId]);
+
+  useEffect(() => {
+    if (selectedEventId) {
+      loadGuests();
+    }
+  }, [searchTerm, rsvpFilter, tagFilter]);
 
   const loadEvents = async () => {
     try {
@@ -41,7 +52,11 @@ export const GuestsPage: React.FC = () => {
 
   const loadGuests = async () => {
     try {
-      const response = await guestService.getAll(selectedEventId);
+      const params: any = {};
+      if (searchTerm) params.q = searchTerm;
+      if (rsvpFilter) params.rsvp_status = rsvpFilter;
+      if (tagFilter) params.tag = tagFilter;
+      const response = await guestService.getAll(selectedEventId, params);
       setGuests(response.data);
     } catch (error: any) {
       addToast('Failed to load guests', 'error');
@@ -136,10 +151,41 @@ export const GuestsPage: React.FC = () => {
         </select>
       </Card>
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">
-          Guests ({guests.length})
-        </h2>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold text-gray-900">
+            Guests ({guests.length})
+          </h2>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <select
+            value={rsvpFilter}
+            onChange={(e) => setRsvpFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All RSVP</option>
+            <option value="Pending">Pending</option>
+            <option value="Going">Going</option>
+            <option value="Maybe">Maybe</option>
+            <option value="NotGoing">Not Going</option>
+          </select>
+          <select
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Categories</option>
+            <option value="VIP">VIP</option>
+            <option value="Family">Family</option>
+            <option value="Friends">Friends</option>
+            <option value="Work">Work</option>
+          </select>
+        </div>
         <Button onClick={() => {
           setEditingGuest(null);
           setIsModalOpen(true);

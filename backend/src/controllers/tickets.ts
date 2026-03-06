@@ -6,10 +6,19 @@ import { Ticket } from '../types';
 export const getTickets = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    const tickets = await allAsync(
-      'SELECT * FROM tickets WHERE event_id = ? ORDER BY created_at DESC',
-      [eventId]
-    );
+    const { q, status } = req.query as any;
+    let sql = 'SELECT * FROM tickets WHERE event_id = ?';
+    const params2: any[] = [eventId];
+    if (q) {
+      sql += ' AND name LIKE ?';
+      params2.push(`%${q}%`);
+    }
+    if (status) {
+      sql += ' AND status = ?';
+      params2.push(status);
+    }
+    sql += ' ORDER BY created_at DESC';
+    const tickets = await allAsync(sql, params2);
     res.json(tickets);
   } catch (error) {
     console.error('Get tickets error:', error);

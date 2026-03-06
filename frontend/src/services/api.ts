@@ -18,7 +18,7 @@ export const authService = {
 
 // Events
 export const eventService = {
-  getAll: () => api.get('/events'),
+  getAll: (params?: any) => api.get('/events', { params }),
   getById: (id: string) => api.get(`/events/${id}`),
   create: (data: any) => api.post('/events', data),
   update: (id: string, data: any) => api.put(`/events/${id}`, data),
@@ -27,7 +27,7 @@ export const eventService = {
 
 // Guests
 export const guestService = {
-  getAll: (eventId: string) => api.get(`/guests/${eventId}/guests`),
+  getAll: (eventId: string, params?: any) => api.get(`/guests/${eventId}/guests`, { params }),
   create: (eventId: string, data: any) => api.post(`/guests/${eventId}/guests`, data),
   update: (eventId: string, guestId: string, data: any) =>
     api.put(`/guests/${eventId}/guests/${guestId}`, data),
@@ -37,14 +37,14 @@ export const guestService = {
 
 // Budget (Vendors & Expenses)
 export const budgetService = {
-  getVendors: (eventId: string) => api.get(`/budget/${eventId}/vendors`),
+  getVendors: (eventId: string, params?: any) => api.get(`/budget/${eventId}/vendors`, { params }),
   createVendor: (eventId: string, data: any) => api.post(`/budget/${eventId}/vendors`, data),
   updateVendor: (eventId: string, vendorId: string, data: any) =>
     api.put(`/budget/${eventId}/vendors/${vendorId}`, data),
   deleteVendor: (eventId: string, vendorId: string) =>
     api.delete(`/budget/${eventId}/vendors/${vendorId}`),
 
-  getExpenses: (eventId: string) => api.get(`/budget/${eventId}/expenses`),
+  getExpenses: (eventId: string, params?: any) => api.get(`/budget/${eventId}/expenses`, { params }),
   createExpense: (eventId: string, data: any) => api.post(`/budget/${eventId}/expenses`, data),
   updateExpense: (eventId: string, expenseId: string, data: any) =>
     api.put(`/budget/${eventId}/expenses/${expenseId}`, data),
@@ -55,7 +55,7 @@ export const budgetService = {
 // Tickets & Registrations
 export const ticketingService = {
   // Tickets for an event
-  getTickets: (eventId: string) => api.get(`/events/${eventId}/tickets`),
+  getTickets: (eventId: string, params?: any) => api.get(`/events/${eventId}/tickets`, { params }),
   createTicket: (eventId: string, data: any) =>
     api.post(`/events/${eventId}/tickets`, data),
   updateTicket: (eventId: string, ticketId: string, data: any) =>
@@ -64,7 +64,7 @@ export const ticketingService = {
     api.delete(`/events/${eventId}/tickets/${ticketId}`),
 
   // Registrations for an event
-  getRegistrations: (eventId: string) => api.get(`/events/${eventId}/registrations`),
+  getRegistrations: (eventId: string, params?: any) => api.get(`/events/${eventId}/registrations`, { params }),
   createRegistration: (eventId: string, data: any) =>
     api.post(`/events/${eventId}/registrations`, data),
   updateRegistration: (eventId: string, registrationId: string, data: any) =>
@@ -75,7 +75,7 @@ export const ticketingService = {
 
 // Sponsors & Sponsorships
 export const sponsorService = {
-  getAll: () => api.get('/sponsors'),
+  getAll: (params?: any) => api.get('/sponsors', { params }),
   getById: (id: string) => api.get(`/sponsors/${id}`),
   create: (data: any) => api.post('/sponsors', data),
   update: (id: string, data: any) => api.put(`/sponsors/${id}`, data),

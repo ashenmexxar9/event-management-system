@@ -11,15 +11,27 @@ export const EventsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
   const { addToast } = useToast();
 
   useEffect(() => {
     loadEvents();
   }, []);
 
+  useEffect(() => {
+    loadEvents();
+  }, [searchTerm, statusFilter]);
+
   const loadEvents = async () => {
     try {
-      const response = await eventService.getAll();
+      const params: any = {};
+      if (searchTerm) params.q = searchTerm;
+      if (statusFilter) params.status = statusFilter;
+
+      const response = await eventService.getAll(params);
       setEvents(response.data);
     } catch (error: any) {
       addToast(error.response?.data?.error || 'Failed to load events', 'error');
@@ -37,7 +49,9 @@ export const EventsPage: React.FC = () => {
         await eventService.create(formData);
         addToast('Event created successfully', 'success');
       }
+
       setEditingEvent(null);
+      setIsModalOpen(false);
       loadEvents();
     } catch (error: any) {
       addToast(error.response?.data?.error || 'Operation failed', 'error');
@@ -46,6 +60,7 @@ export const EventsPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure?')) return;
+
     try {
       await eventService.delete(id);
       addToast('Event deleted successfully', 'success');
@@ -83,21 +98,43 @@ export const EventsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Events</h1>
           <p className="text-gray-500 mt-1">Manage and organize your events</p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingEvent(null);
-            setIsModalOpen(true);
-          }}
-          size="lg"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          New Event
-        </Button>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All status</option>
+            <option value="Draft">Draft</option>
+            <option value="Published">Published</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+
+          <Button
+            onClick={() => {
+              setEditingEvent(null);
+              setIsModalOpen(true);
+            }}
+            size="lg"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            New Event
+          </Button>
+        </div>
       </div>
 
       {events.length === 0 ? (
@@ -114,22 +151,29 @@ export const EventsPage: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-bold text-gray-900">{event.title}</h3>
-                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                      event.status === 'Draft' ? 'bg-gray-100 text-gray-700' :
-                      event.status === 'Published' ? 'bg-green-100 text-green-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full font-medium ${
+                        event.status === 'Draft'
+                          ? 'bg-gray-100 text-gray-700'
+                          : event.status === 'Published'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
                       {event.status}
                     </span>
                   </div>
+
                   {event.description && (
                     <p className="text-gray-600 text-sm mb-3">{event.description}</p>
                   )}
+
                   <div className="flex gap-6 text-sm text-gray-500">
                     <span>📅 {event.date} at {event.time}</span>
                     {event.location && <span>📍 {event.location}</span>}
                   </div>
                 </div>
+
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => {
@@ -140,6 +184,7 @@ export const EventsPage: React.FC = () => {
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
+
                   <button
                     onClick={() => handleDelete(event.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

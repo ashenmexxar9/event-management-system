@@ -21,6 +21,12 @@ export const BudgetPage: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [budgetData, setBudgetData] = useState<BudgetSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // search / filter state
+  const [vendorSearch, setVendorSearch] = useState('');
+  const [vendorTypeFilter, setVendorTypeFilter] = useState('');
+  const [expenseSearch, setExpenseSearch] = useState('');
+  const [expenseStatusFilter, setExpenseStatusFilter] = useState('');
   const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
@@ -36,6 +42,12 @@ export const BudgetPage: React.FC = () => {
       loadData();
     }
   }, [selectedEventId]);
+
+  useEffect(() => {
+    if (selectedEventId) {
+      loadData();
+    }
+  }, [vendorSearch, vendorTypeFilter, expenseSearch, expenseStatusFilter]);
 
   const loadEvents = async () => {
     try {
@@ -53,9 +65,16 @@ export const BudgetPage: React.FC = () => {
 
   const loadData = async () => {
     try {
+      const vendorParams: any = {};
+      if (vendorSearch) vendorParams.q = vendorSearch;
+      if (vendorTypeFilter) vendorParams.service_type = vendorTypeFilter;
+      const expenseParams: any = {};
+      if (expenseSearch) expenseParams.q = expenseSearch;
+      if (expenseStatusFilter) expenseParams.payment_status = expenseStatusFilter;
+
       const [vendorsRes, expensesRes] = await Promise.all([
-        budgetService.getVendors(selectedEventId),
-        budgetService.getExpenses(selectedEventId),
+        budgetService.getVendors(selectedEventId, vendorParams),
+        budgetService.getExpenses(selectedEventId, expenseParams),
       ]);
       setVendors(vendorsRes.data);
       setBudgetData(expensesRes.data);
@@ -230,8 +249,31 @@ export const BudgetPage: React.FC = () => {
 
       {/* Vendors */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Vendors ({vendors.length})</h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900">Vendors ({vendors.length})</h2>
+            <input
+              type="text"
+              placeholder="Search vendors..."
+              value={vendorSearch}
+              onChange={(e) => setVendorSearch(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              value={vendorTypeFilter}
+              onChange={(e) => setVendorTypeFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All types</option>
+              <option value="Catering">Catering</option>
+              <option value="Hall">Hall/Venue</option>
+              <option value="Photography">Photography</option>
+              <option value="Decoration">Decoration</option>
+              <option value="Music">Music/DJ</option>
+              <option value="Transport">Transport</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
           <Button size="sm" onClick={() => {
             setEditingVendor(null);
             setIsVendorModalOpen(true);
@@ -286,8 +328,26 @@ export const BudgetPage: React.FC = () => {
 
       {/* Expenses */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Expenses ({expenses.length})</h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900">Expenses ({expenses.length})</h2>
+            <input
+              type="text"
+              placeholder="Search expenses..."
+              value={expenseSearch}
+              onChange={(e) => setExpenseSearch(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              value={expenseStatusFilter}
+              onChange={(e) => setExpenseStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All status</option>
+              <option value="Paid">Paid</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+          </div>
           <Button size="sm" onClick={() => {
             setEditingExpense(null);
             setIsExpenseModalOpen(true);

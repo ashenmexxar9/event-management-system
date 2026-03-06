@@ -193,6 +193,7 @@ After seeding the database, use these credentials to login:
 
 ### Events
 - `GET /api/events` - Get all events (filtered by role)
+  - supports optional query parameters: `q` for search term (title/description/location) and `status` to filter by Draft/Published/Cancelled
 - `POST /api/events` - Create event
 - `GET /api/events/:id` - Get event by ID
 - `PUT /api/events/:id` - Update event
@@ -200,6 +201,7 @@ After seeding the database, use these credentials to login:
 
 ### Guests
 - `GET /api/guests/:eventId/guests` - Get event guests
+  - optional params: `q` (name/email/phone search), `rsvp_status`, `tag`
 - `POST /api/guests/:eventId/guests` - Add guest
 - `PUT /api/guests/:eventId/guests/:guestId` - Update guest
 - `DELETE /api/guests/:eventId/guests/:guestId` - Delete guest
@@ -217,11 +219,13 @@ After seeding the database, use these credentials to login:
 
 ### Budget
 - `GET /api/budget/:eventId/vendors` - Get vendors
+  - optional params: `q` (name/contact/notes), `service_type`
 - `POST /api/budget/:eventId/vendors` - Add vendor
 - `PUT /api/budget/:eventId/vendors/:vendorId` - Update vendor
 - `DELETE /api/budget/:eventId/vendors/:vendorId` - Delete vendor
 
 - `GET /api/budget/:eventId/expenses` - Get expenses
+  - optional params: `q` (title), `payment_status`
 - `POST /api/budget/:eventId/expenses` - Add expense
 - `PUT /api/budget/:eventId/expenses/:expenseId` - Update expense
 - `DELETE /api/budget/:eventId/expenses/:expenseId` - Delete expense
@@ -235,6 +239,7 @@ After seeding the database, use these credentials to login:
 
 ### Tickets
 - `GET /api/events/:eventId/tickets` - Get ticket types for an event
+  - optional params: `q` (name), `status`
 - `POST /api/events/:eventId/tickets` - Create ticket type
 - `GET /api/events/:eventId/tickets/:ticketId` - Get ticket type by ID
 - `PUT /api/events/:eventId/tickets/:ticketId` - Update ticket type
@@ -242,6 +247,7 @@ After seeding the database, use these credentials to login:
 
 ### Registrations
 - `GET /api/events/:eventId/registrations` - Get registrations for an event
+  - optional params: `q` (attendee name), `payment_status`, `ticket_id`
 - `POST /api/events/:eventId/registrations` - Create registration
 - `PUT /api/events/:eventId/registrations/:registrationId` - Update registration
 - `DELETE /api/events/:eventId/registrations/:registrationId` - Delete registration

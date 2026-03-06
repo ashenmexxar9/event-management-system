@@ -16,6 +16,12 @@ export const TicketingPage: React.FC = () => {
   const [isRegModalOpen, setIsRegModalOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState<TicketType | null>(null);
   const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
+
+  // search/filter
+  const [ticketSearch, setTicketSearch] = useState('');
+  const [ticketStatusFilter, setTicketStatusFilter] = useState('');
+  const [regSearch, setRegSearch] = useState('');
+  const [regPaymentFilter, setRegPaymentFilter] = useState('');
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -27,6 +33,12 @@ export const TicketingPage: React.FC = () => {
       loadData();
     }
   }, [selectedEventId]);
+
+  useEffect(() => {
+    if (selectedEventId) {
+      loadData();
+    }
+  }, [ticketSearch, ticketStatusFilter, regSearch, regPaymentFilter]);
 
   const loadEvents = async () => {
     try {
@@ -44,9 +56,15 @@ export const TicketingPage: React.FC = () => {
 
   const loadData = async () => {
     try {
+      const ticketParams: any = {};
+      if (ticketSearch) ticketParams.q = ticketSearch;
+      if (ticketStatusFilter) ticketParams.status = ticketStatusFilter;
+      const regParams: any = {};
+      if (regSearch) regParams.q = regSearch;
+      if (regPaymentFilter) regParams.payment_status = regPaymentFilter;
       const [ticketsRes, regsRes] = await Promise.all([
-        ticketingService.getTickets(selectedEventId),
-        ticketingService.getRegistrations(selectedEventId),
+        ticketingService.getTickets(selectedEventId, ticketParams),
+        ticketingService.getRegistrations(selectedEventId, regParams),
       ]);
       setTickets(ticketsRes.data);
       setRegistrations(regsRes.data);
@@ -226,10 +244,29 @@ export const TicketingPage: React.FC = () => {
 
       {/* Tickets */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
-            Ticket Types ({tickets.length})
-          </h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900">
+              Ticket Types ({tickets.length})
+            </h2>
+            <input
+              type="text"
+              placeholder="Search tickets..."
+              value={ticketSearch}
+              onChange={(e) => setTicketSearch(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              value={ticketStatusFilter}
+              onChange={(e) => setTicketStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All status</option>
+              <option value="Active">Active</option>
+              <option value="SoldOut">SoldOut</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
           <Button
             size="sm"
             onClick={() => {
@@ -358,10 +395,29 @@ export const TicketingPage: React.FC = () => {
 
       {/* Registrations */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
-            Registrations ({registrations.length})
-          </h2>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900">
+              Registrations ({registrations.length})
+            </h2>
+            <input
+              type="text"
+              placeholder="Search registrations..."
+              value={regSearch}
+              onChange={(e) => setRegSearch(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              value={regPaymentFilter}
+              onChange={(e) => setRegPaymentFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All payment</option>
+              <option value="Pending">Pending</option>
+              <option value="Paid">Paid</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
           <Button
             size="sm"
             onClick={() => {

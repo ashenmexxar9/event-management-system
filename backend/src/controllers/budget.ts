@@ -16,10 +16,21 @@ export const getVendors = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const vendors = await allAsync(
-      'SELECT * FROM vendors WHERE event_id = ? ORDER BY created_at DESC',
-      [eventId]
-    );
+    const { q, service_type } = req.query as any;
+    let sql = 'SELECT * FROM vendors WHERE event_id = ?';
+    const params2: any[] = [eventId];
+    if (q) {
+      sql += ' AND (name LIKE ? OR contact LIKE ? OR notes LIKE ?)';
+      const term = `%${q}%`;
+      params2.push(term, term, term);
+    }
+    if (service_type) {
+      sql += ' AND service_type = ?';
+      params2.push(service_type);
+    }
+    sql += ' ORDER BY created_at DESC';
+
+    const vendors = await allAsync(sql, params2);
 
     res.json(vendors);
   } catch (error) {
@@ -127,10 +138,20 @@ export const getExpenses = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    const expenses = await allAsync(
-      'SELECT * FROM expenses WHERE event_id = ? ORDER BY created_at DESC',
-      [eventId]
-    );
+    const { q, payment_status } = req.query as any;
+    let sql = 'SELECT * FROM expenses WHERE event_id = ?';
+    const params2: any[] = [eventId];
+    if (q) {
+      sql += ' AND title LIKE ?';
+      params2.push(`%${q}%`);
+    }
+    if (payment_status) {
+      sql += ' AND payment_status = ?';
+      params2.push(payment_status);
+    }
+    sql += ' ORDER BY created_at DESC';
+
+    const expenses = await allAsync(sql, params2);
 
     // Calculate totals
     const vendors = await allAsync('SELECT price_estimate FROM vendors WHERE event_id = ?', [eventId]);

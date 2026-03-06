@@ -7,13 +7,32 @@ export const getEvents = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
 
+    // support optional query params: q (search term), status
+    const { q, status } = req.query as any;
+
     let query = 'SELECT * FROM events';
     const params: any[] = [];
+    const conditions: string[] = [];
 
     // Non-admins can only see their own events
     if (req.user.role !== 'ADMIN') {
-      query += ' WHERE owner_id = ?';
+      conditions.push('owner_id = ?');
       params.push(req.user.id);
+    }
+
+    if (q) {
+      conditions.push('(title LIKE ? OR description LIKE ? OR location LIKE ?)');
+      const term = `%${q}%`;
+      params.push(term, term, term);
+    }
+
+    if (status) {
+      conditions.push('status = ?');
+      params.push(status);
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
     }
 
     const events = await allAsync(query + ' ORDER BY date DESC', params);

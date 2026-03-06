@@ -10,6 +10,7 @@ export const SponsorsPage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [sponsorSearch, setSponsorSearch] = useState('');
   const [deals, setDeals] = useState<SponsorshipDeal[]>([]);
   const [historyDeals, setHistoryDeals] = useState<SponsorshipDeal[]>([]);
   const [selectedSponsorForHistory, setSelectedSponsorForHistory] = useState<Sponsor | null>(
@@ -27,6 +28,11 @@ export const SponsorsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // reload when search changes
+    loadInitial();
+  }, [sponsorSearch]);
+
+  useEffect(() => {
     if (selectedEventId) {
       loadDealsForEvent();
     }
@@ -36,7 +42,7 @@ export const SponsorsPage: React.FC = () => {
     try {
       const [eventsRes, sponsorsRes] = await Promise.all([
         eventService.getAll(),
-        sponsorService.getAll(),
+        sponsorService.getAll({ q: sponsorSearch }),
       ]);
       setEvents(eventsRes.data);
       setSponsors(sponsorsRes.data);
@@ -225,15 +231,24 @@ export const SponsorsPage: React.FC = () => {
             Manage sponsors, sponsorship deals, and see sponsor history per event.
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingSponsor(null);
-            setIsSponsorModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          New Sponsor
-        </Button>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Search sponsors..."
+            value={sponsorSearch}
+            onChange={(e) => setSponsorSearch(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <Button
+            onClick={() => {
+              setEditingSponsor(null);
+              setIsSponsorModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Sponsor
+          </Button>
+        </div>
       </div>
 
       {/* Event selector */}

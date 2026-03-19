@@ -44,7 +44,26 @@ export const deleteUser = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    await runAsync('DELETE FROM users WHERE id = ?', [userId]);
+    // SQLite foreign keys are enforced (see `PRAGMA foreign_keys = ON`), and
+    // several tables reference users without ON DELETE CASCADE.
+    // To make admin deletion work, we delete dependencies in the correct order.
+    await runAsync('BEGIN TRANSACTION');
+    try {
+      // User-scoped data
+      await runAsync('DELETE FROM notifications WHERE user_id = ?', [userId]);
+      await runAsync('DELETE FROM feedbacks WHERE user_id = ?', [userId]);
+      await runAsync('DELETE FROM sponsors WHERE owner_id = ?', [userId]);
+
+      // Deleting the user's events will cascade into guests/tasks/vendors/expenses/tickets/registrations
+      // because those foreign keys reference events with ON DELETE CASCADE.
+      await runAsync('DELETE FROM events WHERE owner_id = ?', [userId]);
+
+      await runAsync('DELETE FROM users WHERE id = ?', [userId]);
+      await runAsync('COMMIT');
+    } catch (err) {
+      await runAsync('ROLLBACK');
+      throw err;
+    }
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);

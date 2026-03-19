@@ -7,12 +7,27 @@ const getEvents = async (req, res) => {
     try {
         if (!req.user)
             return res.status(401).json({ error: 'Not authenticated' });
+        // support optional query params: q (search term), status
+        const { q, status } = req.query;
         let query = 'SELECT * FROM events';
         const params = [];
+        const conditions = [];
         // Non-admins can only see their own events
         if (req.user.role !== 'ADMIN') {
-            query += ' WHERE owner_id = ?';
+            conditions.push('(owner_id = ? OR is_public = 1)');
             params.push(req.user.id);
+        }
+        if (q) {
+            conditions.push('(title LIKE ? OR description LIKE ? OR location LIKE ?)');
+            const term = `%${q}%`;
+            params.push(term, term, term);
+        }
+        if (status) {
+            conditions.push('status = ?');
+            params.push(status);
+        }
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
         }
         const events = await (0, database_1.allAsync)(query + ' ORDER BY date DESC', params);
         res.json(events);
@@ -32,8 +47,10 @@ const createEvent = async (req, res) => {
             return res.status(400).json({ error: 'Title, date, and time are required' });
         }
         const id = (0, uuid_1.v4)();
-        await (0, database_1.runAsync)(`INSERT INTO events (id, owner_id, title, description, date, time, location, status, cover_image)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+        // System admin creates "global" events visible to all logged-in users.
+        const isPublic = req.user.role === 'ADMIN' ? 1 : 0;
+        await (0, database_1.runAsync)(`INSERT INTO events (id, owner_id, title, description, date, time, location, status, cover_image, is_public)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
             id,
             req.user.id,
             title,
@@ -43,6 +60,7 @@ const createEvent = async (req, res) => {
             location || null,
             status,
             cover_image || null,
+            isPublic,
         ]);
         const event = await (0, database_1.getAsync)('SELECT * FROM events WHERE id = ?', [id]);
         res.status(201).json(event);
@@ -119,8 +137,12 @@ const getEventById = async (req, res) => {
             return res.status(404).json({ error: 'Event not found' });
         }
         // Check access
-        if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
-            return res.status(403).json({ error: 'Access denied' });
+        if (req.user.role !== 'ADMIN') {
+            const isOwner = event.owner_id === req.user.id;
+            const isPublic = event.is_public === 1 || event.is_public === true;
+            if (!isOwner && !isPublic) {
+                return res.status(403).json({ error: 'Access denied' });
+            }
         }
         res.json(event);
     }

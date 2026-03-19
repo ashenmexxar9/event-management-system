@@ -27,7 +27,7 @@ const seedDatabase = async () => {
             console.log('ℹ️ Admin user already exists, skipping insert');
         }
         if (!existingUser) {
-            await (0, database_1.runAsync)('INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)', [userId, 'Ashen', 'user@example.com', userPassword, 'USER']);
+            await (0, database_1.runAsync)('INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)', [userId, 'john doe', 'user@example.com', userPassword, 'USER']);
             console.log('✅ User created: user@example.com / User@123');
         }
         else {
@@ -41,7 +41,7 @@ const seedDatabase = async () => {
             userId,
             'Wedding Celebration',
             'A beautiful wedding ceremony and reception',
-            '2024-06-15',
+            '2026-06-15',
             '18:00',
             'Grand Ballroom, City Hotel',
             'Draft',
@@ -51,9 +51,9 @@ const seedDatabase = async () => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [
             conferenceEventId,
             userId,
-            'Tech Conference 2024',
+            'Tech Conference 2026',
             'Full-day conference with keynotes and workshops',
-            '2024-07-20',
+            '2026-07-20',
             '09:00',
             'Ocean View Conference Hall',
             'Published',
@@ -91,9 +91,9 @@ const seedDatabase = async () => {
         // Add sample tasks
         const taskIds = [(0, uuid_1.v4)(), (0, uuid_1.v4)()];
         await (0, database_1.runAsync)(`INSERT INTO tasks (id, event_id, title, priority, status, due_date, assigned_to)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`, [taskIds[0], weddingEventId, 'Confirm guest list', 'High', 'Doing', '2024-06-01', 'Ashen']);
+       VALUES (?, ?, ?, ?, ?, ?, ?)`, [taskIds[0], weddingEventId, 'Confirm guest list', 'High', 'Doing', '2026-06-01', 'john doe']);
         await (0, database_1.runAsync)(`INSERT INTO tasks (id, event_id, title, priority, status, due_date, assigned_to)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`, [taskIds[1], weddingEventId, 'Book venue', 'High', 'Done', '2024-05-01', 'Ashen']);
+       VALUES (?, ?, ?, ?, ?, ?, ?)`, [taskIds[1], weddingEventId, 'Book venue', 'High', 'Done', '2026-05-01', 'john doe']);
         console.log('✅ Sample tasks created');
         // Add sample expenses
         const expenseIds = [(0, uuid_1.v4)(), (0, uuid_1.v4)()];
@@ -114,8 +114,8 @@ const seedDatabase = async () => {
             15000,
             50,
             10,
-            '2024-05-01',
-            '2024-06-14',
+            '2026-05-01',
+            '2026-06-14',
             'Active',
         ]);
         await (0, database_1.runAsync)(`INSERT INTO tickets (id, event_id, name, price, total_quantity, sold_quantity, sale_start_date, sale_end_date, status)
@@ -126,8 +126,8 @@ const seedDatabase = async () => {
             8000,
             200,
             60,
-            '2024-05-10',
-            '2024-06-14',
+            '2026-05-10',
+            '2026-06-14',
             'Active',
         ]);
         await (0, database_1.runAsync)(`INSERT INTO tickets (id, event_id, name, price, total_quantity, sold_quantity, sale_start_date, sale_end_date, status)
@@ -138,8 +138,8 @@ const seedDatabase = async () => {
             12000,
             150,
             40,
-            '2024-06-01',
-            '2024-07-19',
+            '2026-06-01',
+            '2026-07-19',
             'Active',
         ]);
         console.log('✅ Sample tickets created');

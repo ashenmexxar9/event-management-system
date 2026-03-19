@@ -16,6 +16,8 @@ const tickets_1 = __importDefault(require("./routes/tickets"));
 const registrations_1 = __importDefault(require("./routes/registrations"));
 const sponsors_1 = __importDefault(require("./routes/sponsors"));
 const sponsorships_1 = __importDefault(require("./routes/sponsorships"));
+const feedbacks_1 = __importDefault(require("./routes/feedbacks"));
+const users_1 = __importDefault(require("./routes/users"));
 const notifications_2 = require("./controllers/notifications");
 require('dotenv').config();
 const app = (0, express_1.default)();
@@ -91,6 +93,8 @@ app.use('/api/events/:eventId/tickets', tickets_1.default);
 app.use('/api/events/:eventId/registrations', registrations_1.default);
 app.use('/api/sponsors', sponsors_1.default);
 app.use('/api/events/:eventId/sponsorships', sponsorships_1.default);
+app.use('/api/events', feedbacks_1.default);
+app.use('/api/users', users_1.default);
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });

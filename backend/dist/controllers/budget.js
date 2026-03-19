@@ -15,7 +15,20 @@ const getVendors = async (req, res) => {
         if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
             return res.status(403).json({ error: 'Access denied' });
         }
-        const vendors = await (0, database_1.allAsync)('SELECT * FROM vendors WHERE event_id = ? ORDER BY created_at DESC', [eventId]);
+        const { q, service_type } = req.query;
+        let sql = 'SELECT * FROM vendors WHERE event_id = ?';
+        const params2 = [eventId];
+        if (q) {
+            sql += ' AND (name LIKE ? OR contact LIKE ? OR notes LIKE ?)';
+            const term = `%${q}%`;
+            params2.push(term, term, term);
+        }
+        if (service_type) {
+            sql += ' AND service_type = ?';
+            params2.push(service_type);
+        }
+        sql += ' ORDER BY created_at DESC';
+        const vendors = await (0, database_1.allAsync)(sql, params2);
         res.json(vendors);
     }
     catch (error) {
@@ -108,7 +121,19 @@ const getExpenses = async (req, res) => {
         if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
             return res.status(403).json({ error: 'Access denied' });
         }
-        const expenses = await (0, database_1.allAsync)('SELECT * FROM expenses WHERE event_id = ? ORDER BY created_at DESC', [eventId]);
+        const { q, payment_status } = req.query;
+        let sql = 'SELECT * FROM expenses WHERE event_id = ?';
+        const params2 = [eventId];
+        if (q) {
+            sql += ' AND title LIKE ?';
+            params2.push(`%${q}%`);
+        }
+        if (payment_status) {
+            sql += ' AND payment_status = ?';
+            params2.push(payment_status);
+        }
+        sql += ' ORDER BY created_at DESC';
+        const expenses = await (0, database_1.allAsync)(sql, params2);
         // Calculate totals
         const vendors = await (0, database_1.allAsync)('SELECT price_estimate FROM vendors WHERE event_id = ?', [eventId]);
         const totalEstimated = vendors.reduce((sum, v) => sum + (v.price_estimate || 0), 0);

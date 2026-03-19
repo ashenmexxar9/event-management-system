@@ -16,6 +16,7 @@ export interface Event {
     location?: string;
     status: 'Draft' | 'Published' | 'Cancelled';
     cover_image?: string;
+    is_public?: number;
     created_at?: string;
     updated_at?: string;
 }
@@ -101,6 +102,15 @@ export interface SponsorshipDeal {
     deal_status: 'Proposed' | 'Confirmed' | 'Paid' | 'Cancelled';
     payment_status: 'Pending' | 'Paid';
     created_at?: string;
+}
+export interface Feedback {
+    id: string;
+    event_id: string;
+    user_id: string;
+    rating: number;
+    comment?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 export interface AuthRequest {
     email: string;

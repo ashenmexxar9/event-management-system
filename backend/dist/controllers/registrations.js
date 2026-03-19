@@ -21,7 +21,23 @@ const recalculateTicketQuantities = async (ticketId) => {
 const getRegistrations = async (req, res) => {
     try {
         const { eventId } = req.params;
-        const registrations = await (0, database_1.allAsync)('SELECT * FROM registrations WHERE event_id = ? ORDER BY created_at DESC', [eventId]);
+        const { q, payment_status, ticket_id } = req.query;
+        let sql = 'SELECT * FROM registrations WHERE event_id = ?';
+        const params2 = [eventId];
+        if (q) {
+            sql += ' AND attendee_name LIKE ?';
+            params2.push(`%${q}%`);
+        }
+        if (payment_status) {
+            sql += ' AND payment_status = ?';
+            params2.push(payment_status);
+        }
+        if (ticket_id) {
+            sql += ' AND ticket_id = ?';
+            params2.push(ticket_id);
+        }
+        sql += ' ORDER BY created_at DESC';
+        const registrations = await (0, database_1.allAsync)(sql, params2);
         res.json(registrations);
     }
     catch (error) {

@@ -15,7 +15,25 @@ const getGuests = async (req, res) => {
         if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
             return res.status(403).json({ error: 'Access denied' });
         }
-        const guests = await (0, database_1.allAsync)('SELECT * FROM guests WHERE event_id = ? ORDER BY created_at DESC', [eventId]);
+        // allow search by name/email/phone and filter by rsvp_status or tag
+        const { q, rsvp_status, tag } = req.query;
+        let base = 'SELECT * FROM guests WHERE event_id = ?';
+        const params2 = [eventId];
+        if (q) {
+            base += ' AND (name LIKE ? OR email LIKE ? OR phone LIKE ?)';
+            const term = `%${q}%`;
+            params2.push(term, term, term);
+        }
+        if (rsvp_status) {
+            base += ' AND rsvp_status = ?';
+            params2.push(rsvp_status);
+        }
+        if (tag) {
+            base += ' AND tag = ?';
+            params2.push(tag);
+        }
+        base += ' ORDER BY created_at DESC';
+        const guests = await (0, database_1.allAsync)(base, params2);
         res.json(guests);
     }
     catch (error) {

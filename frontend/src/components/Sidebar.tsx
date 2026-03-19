@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Calendar, Users, DollarSign, LogOut, BarChart3, Ticket as TicketIcon, DollarSign as SponsorIcon } from 'lucide-react';
+import { Calendar, Users, DollarSign, LogOut, BarChart3, Ticket as TicketIcon, DollarSign as SponsorIcon, MessageSquare, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { NotificationsDropdown } from './NotificationsDropdown';
@@ -19,6 +19,8 @@ export const Sidebar: React.FC = () => {
     { path: '/app/ticketing', icon: TicketIcon, label: 'Ticketing & Reg', color: 'text-pink-600' },
     { path: '/app/sponsors', icon: SponsorIcon, label: 'Sponsor Management', color: 'text-amber-600' },
     { path: '/app/analytics', icon: BarChart3, label: 'Analytics', color: 'text-indigo-600' },
+    { path: '/app/feedback', icon: MessageSquare, label: 'Feedback', color: 'text-red-600' },
+    ...(user?.role === 'ADMIN' ? [{ path: '/app/users', icon: Settings, label: 'User Management', color: 'text-gray-600' }] : []),
   ];
 
   const handleLogout = async () => {

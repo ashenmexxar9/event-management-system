@@ -14,6 +14,8 @@ export const authService = {
     api.post('/auth/login', { email, password }),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
+  register: (name: string, email: string, password: string) =>
+    api.post('/auth/register', { name, email, password }),
 };
 
 // Events
@@ -93,4 +95,24 @@ export const sponsorshipService = {
     api.delete(`/events/${eventId}/sponsorships/${dealId}`),
 };
 
+// Feedbacks
+export const feedbackService = {
+  getAll: (eventId: string) => api.get(`/events/${eventId}/feedbacks`),
+  getByUser: (eventId: string) => api.get(`/events/${eventId}/feedbacks/me`),
+  getStats: (eventId: string) => api.get(`/events/${eventId}/feedbacks/stats`),
+  create: (eventId: string, data: any) => api.post(`/events/${eventId}/feedbacks`, data),
+  update: (eventId: string, feedbackId: string, data: any) =>
+    api.put(`/events/${eventId}/feedbacks/${feedbackId}`, data),
+  delete: (eventId: string, feedbackId: string) =>
+    api.delete(`/events/${eventId}/feedbacks/${feedbackId}`),
+};
+
+// Users (Admin management)
+export const userService = {
+  getAll: (params?: any) => api.get('/users', { params }),
+  search: (q: string) => api.get('/users/search', { params: { q } }),
+  updateRole: (userId: string, data: any) =>
+    api.put(`/users/${userId}/role`, data),
+  delete: (userId: string) => api.delete(`/users/${userId}`),
+};
 export default api;

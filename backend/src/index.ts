@@ -11,6 +11,8 @@ import ticketsRoutes from './routes/tickets';
 import registrationsRoutes from './routes/registrations';
 import sponsorsRoutes from './routes/sponsors';
 import sponsorshipsRoutes from './routes/sponsorships';
+import feedbacksRoutes from './routes/feedbacks';
+import usersRoutes from './routes/users';
 import { createNotification } from './controllers/notifications';
 import { authMiddleware } from './middleware/auth';
 
@@ -138,6 +140,8 @@ app.use('/api/events/:eventId/tickets', ticketsRoutes);
 app.use('/api/events/:eventId/registrations', registrationsRoutes);
 app.use('/api/sponsors', sponsorsRoutes);
 app.use('/api/events/:eventId/sponsorships', sponsorshipsRoutes);
+app.use('/api/events', feedbacksRoutes);
+app.use('/api/users', usersRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {

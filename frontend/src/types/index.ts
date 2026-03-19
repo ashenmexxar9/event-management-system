@@ -109,3 +109,15 @@ export interface SponsorshipDeal {
   payment_status: 'Pending' | 'Paid';
   created_at?: string;
 }
+
+export interface Feedback {
+  id: string;
+  event_id: string;
+  user_id: string;
+  rating: number;
+  comment?: string;
+  user_name?: string;
+  user_email?: string;
+  created_at?: string;
+  updated_at?: string;
+}

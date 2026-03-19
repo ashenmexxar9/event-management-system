@@ -114,6 +114,16 @@ export interface SponsorshipDeal {
   created_at?: string;
 }
 
+export interface Feedback {
+  id: string;
+  event_id: string;
+  user_id: string;
+  rating: number;
+  comment?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface AuthRequest {
   email: string;
   password: string;

@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Sidebar } from './components/Sidebar';
 import { Toast } from './components/Toast';
 import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
 import { EventsPage } from './pages/EventsPage';
 import { GuestsPage } from './pages/GuestsPage';
 import { BudgetPage } from './pages/BudgetPage';
@@ -14,6 +15,8 @@ import { CalendarPage } from './pages/CalendarPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { TicketingPage } from './pages/TicketingPage';
 import { SponsorsPage } from './pages/SponsorsPage';
+import { FeedbackPage } from './pages/FeedbackPage';
+import { UserManagementPage } from './pages/UserManagementPage';
 import './index.css';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -37,6 +40,7 @@ function App() {
           <NotificationsProvider>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
               <Route
                 path="/app/*"
                 element={
@@ -95,6 +99,22 @@ function App() {
                         element={
                           <AppLayout>
                             <AnalyticsPage />
+                          </AppLayout>
+                        }
+                      />
+                      <Route
+                        path="feedback"
+                        element={
+                          <AppLayout>
+                            <FeedbackPage />
+                          </AppLayout>
+                        }
+                      />
+                      <Route
+                        path="users"
+                        element={
+                          <AppLayout>
+                            <UserManagementPage />
                           </AppLayout>
                         }
                       />

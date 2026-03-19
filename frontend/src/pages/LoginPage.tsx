@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/Common';
@@ -96,6 +96,14 @@ export const LoginPage: React.FC = () => {
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Event planning system powered by ©Eventora 2026
+        </p>
+
+        {/* Signup Link */}
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Don't have an account?{' '}
+          <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+            Sign Up
+          </Link>
         </p>
       </div>
     </div>

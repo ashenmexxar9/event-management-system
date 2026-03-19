@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Trash2, Edit2, Shield } from 'lucide-react';
+import { Trash2, Shield } from 'lucide-react';
 import { userService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Card, Button } from '../components/Common';
+import { Card } from '../components/Common';
 
 interface User {
   id: string;
@@ -14,7 +14,7 @@ interface User {
 }
 
 export const UserManagementPage: React.FC = () => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isLoading: authLoading } = useAuth();
   const { addToast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,13 +25,16 @@ export const UserManagementPage: React.FC = () => {
   const [newRole, setNewRole] = useState<'ADMIN' | 'USER'>('USER');
 
   useEffect(() => {
-    // Redirect if not admin
+    // Wait until auth state is ready before deciding access.
+    if (authLoading) return;
+
+    // Redirect/deny if not admin
     if (currentUser?.role !== 'ADMIN') {
       addToast('Access denied', 'error');
       return;
     }
     loadUsers();
-  }, []);
+  }, [authLoading, currentUser?.role]);
 
   useEffect(() => {
     if (searchTerm) {

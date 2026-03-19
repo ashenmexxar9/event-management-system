@@ -7,11 +7,20 @@ const getSponsors = async (req, res) => {
     try {
         if (!req.user)
             return res.status(401).json({ error: 'Not authenticated' });
+        const { q } = req.query;
         let query = 'SELECT * FROM sponsors';
         const params = [];
+        const conds = [];
         if (req.user.role !== 'ADMIN') {
-            query += ' WHERE owner_id = ?';
+            conds.push('owner_id = ?');
             params.push(req.user.id);
+        }
+        if (q) {
+            conds.push('name LIKE ?');
+            params.push(`%${q}%`);
+        }
+        if (conds.length > 0) {
+            query += ' WHERE ' + conds.join(' AND ');
         }
         const sponsors = await (0, database_1.allAsync)(query + ' ORDER BY created_at DESC', params);
         res.json(sponsors);

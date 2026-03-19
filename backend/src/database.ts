@@ -69,11 +69,22 @@ export const initializeDatabase = async () => {
       location TEXT,
       status TEXT DEFAULT 'Draft',
       cover_image TEXT,
+      -- When 1, non-admin users can see this event.
+      -- This lets the system admin create "global" events.
+      is_public INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (owner_id) REFERENCES users(id)
     )
   `);
+
+  // Backfill column for existing databases.
+  // SQLite doesn't support "IF NOT EXISTS" for ADD COLUMN.
+  try {
+    await runAsync('ALTER TABLE events ADD COLUMN is_public INTEGER DEFAULT 0');
+  } catch {
+    // Column already exists (or DB can't be altered). Safe to ignore here.
+  }
 
   // Create Guests table
   await runAsync(`

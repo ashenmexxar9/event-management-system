@@ -6,7 +6,19 @@ const database_1 = require("../database");
 const getTickets = async (req, res) => {
     try {
         const { eventId } = req.params;
-        const tickets = await (0, database_1.allAsync)('SELECT * FROM tickets WHERE event_id = ? ORDER BY created_at DESC', [eventId]);
+        const { q, status } = req.query;
+        let sql = 'SELECT * FROM tickets WHERE event_id = ?';
+        const params2 = [eventId];
+        if (q) {
+            sql += ' AND name LIKE ?';
+            params2.push(`%${q}%`);
+        }
+        if (status) {
+            sql += ' AND status = ?';
+            params2.push(status);
+        }
+        sql += ' ORDER BY created_at DESC';
+        const tickets = await (0, database_1.allAsync)(sql, params2);
         res.json(tickets);
     }
     catch (error) {

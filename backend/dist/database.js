@@ -76,11 +76,22 @@ const initializeDatabase = async () => {
       location TEXT,
       status TEXT DEFAULT 'Draft',
       cover_image TEXT,
+      -- When 1, non-admin users can see this event.
+      -- This lets the system admin create "global" events.
+      is_public INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (owner_id) REFERENCES users(id)
     )
   `);
+    // Backfill column for existing databases.
+    // SQLite doesn't support "IF NOT EXISTS" for ADD COLUMN.
+    try {
+        await (0, exports.runAsync)('ALTER TABLE events ADD COLUMN is_public INTEGER DEFAULT 0');
+    }
+    catch {
+        // Column already exists (or DB can't be altered). Safe to ignore here.
+    }
     // Create Guests table
     await (0, exports.runAsync)(`
     CREATE TABLE IF NOT EXISTS guests (
@@ -226,6 +237,20 @@ const initializeDatabase = async () => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (sponsor_id) REFERENCES sponsors(id) ON DELETE CASCADE,
       FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    )
+  `);
+    // Create Feedbacks table
+    await (0, exports.runAsync)(`
+    CREATE TABLE IF NOT EXISTS feedbacks (
+      id TEXT PRIMARY KEY,
+      event_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+      comment TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
     console.log('Database initialized successfully');

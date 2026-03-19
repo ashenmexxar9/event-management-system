@@ -15,6 +15,8 @@ export interface Event {
   location?: string;
   status: 'Draft' | 'Published' | 'Cancelled';
   cover_image?: string;
+  // When 1, non-admin users can view this event.
+  is_public?: number;
   created_at?: string;
   updated_at?: string;
 }

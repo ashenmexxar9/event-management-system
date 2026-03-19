@@ -16,7 +16,7 @@ export const getEvents = async (req: Request, res: Response) => {
 
     // Non-admins can only see their own events
     if (req.user.role !== 'ADMIN') {
-      conditions.push('owner_id = ?');
+      conditions.push('(owner_id = ? OR is_public = 1)');
       params.push(req.user.id);
     }
 
@@ -62,9 +62,11 @@ export const createEvent = async (req: Request, res: Response) => {
     }
 
     const id = uuidv4();
+    // System admin creates "global" events visible to all logged-in users.
+    const isPublic = req.user.role === 'ADMIN' ? 1 : 0;
     await runAsync(
-      `INSERT INTO events (id, owner_id, title, description, date, time, location, status, cover_image)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO events (id, owner_id, title, description, date, time, location, status, cover_image, is_public)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         req.user.id,
@@ -75,6 +77,7 @@ export const createEvent = async (req: Request, res: Response) => {
         location || null,
         status,
         cover_image || null,
+        isPublic,
       ]
     );
 
@@ -171,8 +174,12 @@ export const getEventById = async (req: Request, res: Response) => {
     }
 
     // Check access
-    if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (req.user.role !== 'ADMIN') {
+      const isOwner = event.owner_id === req.user.id;
+      const isPublic = event.is_public === 1 || event.is_public === true;
+      if (!isOwner && !isPublic) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
     }
 
     res.json(event);

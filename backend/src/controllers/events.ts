@@ -14,9 +14,9 @@ export const getEvents = async (req: Request, res: Response) => {
     const params: any[] = [];
     const conditions: string[] = [];
 
-    // Non-admins can only see their own events
+    // For non-admins: show Published events from anyone + their own events (all statuses)
     if (req.user.role !== 'ADMIN') {
-      conditions.push('(owner_id = ? OR is_public = 1)');
+      conditions.push('owner_id = ?');
       params.push(req.user.id);
     }
 
@@ -174,12 +174,8 @@ export const getEventById = async (req: Request, res: Response) => {
     }
 
     // Check access
-    if (req.user.role !== 'ADMIN') {
-      const isOwner = event.owner_id === req.user.id;
-      const isPublic = event.is_public === 1 || event.is_public === true;
-      if (!isOwner && !isPublic) {
-        return res.status(403).json({ error: 'Access denied' });
-      }
+    if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     res.json(event);

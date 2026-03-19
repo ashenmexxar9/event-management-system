@@ -11,10 +11,9 @@ const getEvents = async (req, res) => {
         const { q, status } = req.query;
         let query = 'SELECT * FROM events';
         const params = [];
-        const conditions = [];
         // Non-admins can only see their own events
         if (req.user.role !== 'ADMIN') {
-            conditions.push('(owner_id = ? OR is_public = 1)');
+            query += ' WHERE owner_id = ?';
             params.push(req.user.id);
         }
         if (q) {
@@ -137,12 +136,8 @@ const getEventById = async (req, res) => {
             return res.status(404).json({ error: 'Event not found' });
         }
         // Check access
-        if (req.user.role !== 'ADMIN') {
-            const isOwner = event.owner_id === req.user.id;
-            const isPublic = event.is_public === 1 || event.is_public === true;
-            if (!isOwner && !isPublic) {
-                return res.status(403).json({ error: 'Access denied' });
-            }
+        if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
+            return res.status(403).json({ error: 'Access denied' });
         }
         res.json(event);
     }

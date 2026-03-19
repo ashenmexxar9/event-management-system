@@ -7,12 +7,27 @@ const getEvents = async (req, res) => {
     try {
         if (!req.user)
             return res.status(401).json({ error: 'Not authenticated' });
+        // support optional query params: q (search term), status
+        const { q, status } = req.query;
         let query = 'SELECT * FROM events';
         const params = [];
-        // Non-admins can only see their own events
+        const conditions = [];
+        // For non-admins: show Published events from anyone + their own events (all statuses)
         if (req.user.role !== 'ADMIN') {
-            query += ' WHERE owner_id = ?';
-            params.push(req.user.id);
+            conditions.push('(status = ? OR owner_id = ?)');
+            params.push('Published', req.user.id);
+        }
+        if (q) {
+            conditions.push('(title LIKE ? OR description LIKE ? OR location LIKE ?)');
+            const term = `%${q}%`;
+            params.push(term, term, term);
+        }
+        if (status) {
+            conditions.push('status = ?');
+            params.push(status);
+        }
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
         }
         const events = await (0, database_1.allAsync)(query + ' ORDER BY date DESC', params);
         res.json(events);
@@ -118,8 +133,8 @@ const getEventById = async (req, res) => {
         if (!event) {
             return res.status(404).json({ error: 'Event not found' });
         }
-        // Check access
-        if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id) {
+        // Check access: allow if owner, admin, or if event is published
+        if (req.user.role !== 'ADMIN' && event.owner_id !== req.user.id && event.status !== 'Published') {
             return res.status(403).json({ error: 'Access denied' });
         }
         res.json(event);
